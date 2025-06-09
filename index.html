@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Digital Naam Jap Counter for keeping track of your mantra repetitions and completed malas">
+    <meta name="keywords" content="naam jap, mantra counter, mala counter, meditation, spiritual practice">
+    <meta name="theme-color" content="#000000">
+    <title>Naam Jap Counter - Digital Mala Tracking</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap');
+        
+        :root {
+            --primary-color: #ffd700;
+            --secondary-color: #333;
+            --bg-color: rgba(0, 0, 0, 0.7);
+            --text-color: #fff;
+            --muted-color: #aaa;
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Devanagari', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            touch-action: manipulation;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 95%;
+            max-width: 450px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: clamp(24px, 6vw, 28px);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .mantra-display {
+            font-size: clamp(20px, 5vw, 24px);
+            color: var(--primary-color);
+            margin: 15px 0;
+            min-height: 36px;
+            font-weight: bold;
+            word-break: break-word;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 215, 0, 0.1);
+        }
+
+        .counter-display {
+            font-size: clamp(60px, 15vw, 80px);
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .mala-count {
+            font-size: clamp(16px, 4vw, 18px);
+            color: var(--muted-color);
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: clamp(10px, 3vw, 12px) clamp(20px, 5vw, 25px);
+            font-size: clamp(14px, 4vw, 16px);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            min-width: 120px;
+        }
+
+        .count-btn {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .count-btn:active {
+            background-color: #ffc800;
+            transform: translateY(2px);
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.6);
+        }
+
+        .reset-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .reset-btn:active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(2px);
+        }
+
+        .settings {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .settings label {
+            display: block;
+            margin-bottom: 10px;
+            color: #ccc;
+            font-size: clamp(14px, 4vw, 16px);
+        }
+
+        .settings input {
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            width: 60px;
+            text-align: center;
+            color: var(--text-color);
+            margin-right: 8px;
+            font-size: clamp(14px, 4vw, 16px);
+        }
+
+        .settings button {
+            padding: 6px 12px;
+            font-size: clamp(12px, 3.5vw, 14px);
+            background-color: rgba(255, 215, 0, 0.2);
+            color: var(--primary-color);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            min-width: auto;
+        }
+
+        .settings button:active {
+            background-color: rgba(255, 215, 0, 0.3);
+            transform: translateY(2px);
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .celebration.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .celebration h2 {
+            color: var(--primary-color);
+            font-size: clamp(24px, 7vw, 36px);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .celebration p {
+            color: var(--text-color);
+            font-size: clamp(18px, 5vw, 24px);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .celebration button {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 12px 25px;
+            font-size: clamp(16px, 4vw, 18px);
+        }
+
+        .vibrate {
+            animation: vibrate 0.3s linear;
+        }
+
+        @keyframes vibrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .tap-area {
+            display: block;
+            width: 100%;
+            height: 200px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        /* PWA Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .install-prompt button {
+            margin: 5px;
+            padding: 8px 15px;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: var(--muted-color);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Dark mode preference */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #ffd700;
+                --secondary-color: #111;
+                --bg-color: rgba(0, 0, 0, 0.8);
+                --text-color: #eee;
+                --muted-color: #888;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>नाम जप माला काउंटर</h1>
+        
+        <div class="mantra-display" id="mantraDisplay">हर हर महादेव</div>
+        
+        <div class="counter-display" id="counter">0</div>
+        <div class="mala-count" id="malaCount">माला: 0</div>
+        
+        <div class="tap-area" id="tapArea"></div>
+        
+        <div class="button-container">
+            <button class="count-btn" id="countButton">जप करें</button>
+            <button class="reset-btn" id="resetButton">रीसेट</button>
+        </div>
+        
+        <div class="settings">
+            <label>
+                वृद्धि: 
+                <input type="number" id="incrementValue" min="1" value="1">
+            </label>
+            <label>
+                मंत्र: 
+                <input type="text" id="mantraInput" value="हर हर महादेव">
+                <button id="updateMantra">अपडेट</button>
+            </label>
+            <label>
+                माला के लिए जप: 
+                <input type="number" id="malaValue" min="1" value="108">
+            </label>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <h2>🙏 माला पूर्ण हुई 🙏</h2>
+        <p id="completedMalas">1 माला पूरी हुई!</p>
+        <button id="closeCelebration">शुक्रिया</button>
+    </div>
+
+    <div class="install-prompt" id="installPrompt">
+        <p>Install Naam Jap Counter on your device for easy access!</p>
+        <button id="installButton">Install</button>
+        <button id="cancelInstall">Not Now</button>
+    </div>
+
+    <footer>
+        Naam Jap Counter &copy; <span id="currentYear"></span> | Made with ❤️ for spiritual practice
+    </footer>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const counterElement = document.getElementById('counter');
+            const countButton = document.getElementById('countButton');
+            const resetButton = document.getElementById('resetButton');
+            const incrementInput = document.getElementById('incrementValue');
+            const malaValueInput = document.getElementById('malaValue');
+            const mantraDisplay = document.getElementById('mantraDisplay');
+            const mantraInput = document.getElementById('mantraInput');
+            const updateMantraButton = document.getElementById('updateMantra');
+            const malaCountElement = document.getElementById('malaCount');
+            const celebrationElement = document.getElementById('celebration');
+            const completedMalasElement = document.getElementById('completedMalas');
+            const closeCelebrationButton = document.getElementById('closeCelebration');
+            const tapArea = document.getElementById('tapArea');
+            const installPrompt = document.getElementById('installPrompt');
+            const installButton = document.getElementById('installButton');
+            const cancelInstall = document.getElementById('cancelInstall');
+            const currentYear = document.getElementById('currentYear');
+            
+            // Set current year in footer
+            currentYear.textContent = new Date().getFullYear();
+            
+            // Load saved data
+            let count = parseInt(localStorage.getItem('naamJapCount')) || 0;
+            let malaCount = parseInt(localStorage.getItem('naamJapMalaCount')) || 0;
+            const savedMantra = localStorage.getItem('naamJapMantra');
+            const savedMalaValue = localStorage.getItem('naamJapMalaValue');
+            
+            counterElement.textContent = count;
+            malaCountElement.textContent = `माला: ${malaCount}`;
+            
+            if (savedMantra) {
+                mantraDisplay.textContent = savedMantra;
+                mantraInput.value = savedMantra;
+            }
+            
+            if (savedMalaValue) {
+                malaValueInput.value = savedMalaValue;
+            }
+            
+            // Function to increment count
+            function incrementCount() {
+                const increment = parseInt(incrementInput.value) || 1;
+                const malaValue = parseInt(malaValueInput.value) || 108;
+                
+                count += increment;
+                counterElement.textContent = count;
+                localStorage.setItem('naamJapCount', count);
+                
+                // Check for mala completion
+                if (count % malaValue === 0) {
+                    malaCount = Math.floor(count / malaValue);
+                    malaCountElement.textContent = `माला: ${malaCount}`;
+                    localStorage.setItem('naamJapMalaCount', malaCount);
+                    
+                    // Show celebration
+                    completedMalasElement.textContent = `${malaCount} माला पूरी हुई!`;
+                    showCelebration();
+                    
+                    // Create confetti effect
+                    createConfetti();
+                }
+                
+                // Add vibration effect
+                counterElement.classList.add('vibrate');
+                setTimeout(() => {
+                    counterElement.classList.remove('vibrate');
+                }, 300);
+                
+                // Vibrate device if supported
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+            
+            // Count button functionality
+            countButton.addEventListener('click', incrementCount);
+            
+            // Tap area functionality for mobile
+            tapArea.addEventListener('click', incrementCount);
+            
+            // Reset button functionality
+            resetButton.addEventListener('click', function() {
+                if (confirm('क्या आप काउंटर रीसेट करना चाहते हैं?')) {
+                    count = 0;
+                    malaCount = 0;
+                    counterElement.textContent = count;
+                    malaCountElement.textContent = `माला: ${malaCount}`;
+                    localStorage.setItem('naamJapCount', count);
+                    localStorage.setItem('naamJapMalaCount', malaCount);
+                }
+            });
+            
+            // Update mantra
+            updateMantraButton.addEventListener('click', function() {
+                const newMantra = mantraInput.value.trim();
+                if (newMantra) {
+                    mantraDisplay.textContent = newMantra;
+                    localStorage.setItem('naamJapMantra', newMantra);
+                }
+            });
+            
+            // Update mala value
+            malaValueInput.addEventListener('change', function() {
+                localStorage.setItem('naamJapMalaValue', malaValueInput.value);
+            });
+            
+            // Celebration functions
+            function showCelebration() {
+                celebrationElement.classList.add('active');
+            }
+            
+            closeCelebrationButton.addEventListener('click', function() {
+                celebrationElement.classList.remove('active');
+            });
+            
+            // Create confetti effect
+            function createConfetti() {
+                const container = document.querySelector('body');
+                const colors = ['#ffd700', '#ff0000', '#ffffff', '#00ff00', '#0000ff'];
+                
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = -10 + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(confetti);
+                    
+                    const animationDuration = Math.random() * 3 + 2;
+                    
+                    setTimeout(() => {
+                        confetti.style.opacity = '1';
+                        confetti.style.top = '100vh';
+                        confetti.style.left = (parseFloat(confetti.style.left) + (Math.random() * 200 - 100)) + 'px';
+                        confetti.style.transition = `top ${animationDuration}s linear, left ${animationDuration}s ease-in-out`;
+                        
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, animationDuration * 1000);
+                    }, 10);
+                }
+            }
+            
+            // PWA Installation Prompt
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the mini-infobar from appearing on mobile
+                e.preventDefault();
+                // Stash the event so it can be triggered later
+                deferredPrompt = e;
+                // Show the install prompt
+                setTimeout(() => {
+                    installPrompt.style.display = 'block';
+                }, 5000);
+            });
+            
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installPrompt.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            cancelInstall.addEventListener('click', () => {
+                installPrompt.style.display = 'none';
+            });
+            
+            // Prevent zooming on mobile
+            document.addEventListener('gesturestart', function(e) {
+                e.preventDefault();
+            });
+            
+            // Keyboard support for desktop
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    incrementCount();
+                }
+            });
+            
+            // Allow Enter key to update mantra
+            mantraInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    updateMantraButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
